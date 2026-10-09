@@ -40,7 +40,7 @@ and aggregate test errors. Download the selected forecast as CSV if needed.
 Training writes `artifacts/`. The app reads those saved files, so it can run
 without the original dataset. Refresh it after a new training run. The app reloads
 cached models when saved files or model-loading code change, and discards older
-cached models missing forecast configuration. No retraining is needed after a code update.
+cached models missing forecast configuration. Refreshing the viewer loads saved models.
 The command trains both Conv1D and XGBoost. For an existing Conv1D run, add
 `--xgboost-only` to train the comparison model using saved data.
 To refresh competition-style metrics without training:
@@ -48,6 +48,17 @@ To refresh competition-style metrics without training:
 ```bash
 uv run --extra cpu python -m m5_forecast.metrics
 ```
+
+The training command above fits the original models selected by validation MAE.
+To reproduce the improved results, add `sell_prices.csv` to `data/` and run:
+
+```bash
+uv run --extra cpu python -m m5_forecast.improve
+```
+
+This trains on CPU and selects candidates using validation WRMSSE. See
+[Improving the models](../operations/improvements.md) for details, or follow the
+[notebook walkthrough](../operations/notebook.md) to reproduce both runs step by step.
 
 ## 4. Optional GPU
 
@@ -63,14 +74,25 @@ Use one backend extra per command: `cpu` or `cuda`. `auto` falls back to CPU whe
 CUDA is unavailable; `--device cuda` requires it. The viewer always loads weights
 on CPU. Backend setup follows [uv's PyTorch guide](https://docs.astral.sh/uv/guides/integration/pytorch/).
 
-## 5. Docs and checks
+## 5. View the documentation
+
+From the repository root:
 
 ```bash
-make docs                 # http://127.0.0.1:8000
-make docs PORT=8001
+uv run --extra cpu --group docs mkdocs serve -a 127.0.0.1:8000
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser and keep the
+command running. To use port 8889, run `make docs PORT=8889` and open
+[http://127.0.0.1:8889](http://127.0.0.1:8889).
+
+## 6. Checks
+
+```bash
 make docs-build
 make test
 make lint
 ```
 
-Use `BACKEND=cuda` with Make targets when using the CUDA environment.
+Use `BACKEND=cuda` with Make targets when using the CUDA environment. Include the
+notebook integration test with `uv run --extra cpu --group notebook pytest`.

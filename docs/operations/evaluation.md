@@ -44,7 +44,7 @@ missing, without epsilon adjustments or silently dropping positive-weight series
 
 Dollar weights require `sell_prices.csv`. Without it, MAE and RMSSE remain
 available and WRMSSE is shown as missing. The metric refresh command preserves
-weights and predictions:
+model weights and predictions:
 
 ```bash
 uv run --extra cpu python -m m5_forecast.metrics --data-dir data --artifacts-dir artifacts
@@ -116,8 +116,9 @@ unweighted scaled error is RMSSE.
 
 The app caches saved weights, trees, and prepared data, then runs CPU inference for the
 selected window. It never invokes training. Cache keys include file modification
-times, so a refreshed page can pick up a new completed run. Stop the viewer while
-overwriting a run to avoid loading partially written artifacts. Use separate
+times for artifacts and model-loading code; older cached models missing forecast
+configuration are discarded. A refreshed page can pick up a new completed run.
+Stop the viewer while overwriting a run to avoid loading partially written artifacts. Use separate
 artifact directories to keep experiments.
 
 For a saved run created before XGBoost was added, run:
@@ -143,12 +144,14 @@ check training-only selection/scaling, target boundaries, future-input isolation
 the baseline, both models' unit MAE, known-answer RMSSE/WRMSSE calculations,
 past-only price weights, CPU save/load, and the app's saved-artifact flow.
 They also check that changing test sales cannot change XGBoost training. Synthetic
-checks validate plumbing, not accuracy on Walmart data.
+checks validate plumbing, not accuracy on Walmart data. With the `notebook`
+dependency group installed, the suite also runs the notebook's cells on synthetic
+data and verifies both exported runs.
 
 The model learns sales rather than unconstrained demand. Stockouts, promotions,
 prices, and changing assortment are not modeled. Only regular sellers are selected;
 performance does not generalize automatically to intermittent products. The
 seven-day forecast total informs planning but is not an order quantity: inventory,
 lead times, and service-level decisions belong in a separate planning step. This
-demo scores cover regular sellers and a shorter horizon than the competition.
+demo's scores cover regular sellers and a shorter horizon than the competition.
 See [Improving the models](improvements.md) for the next experiments.

@@ -91,7 +91,7 @@ def train_xgboost(
     objective: str = "reg:squarederror",
     scorer=None,
 ) -> tuple[xgb.Booster, dict]:
-    """Train on training windows; use validation unit MAE to stop and retain trees."""
+    """Train on training windows; retain the best validation MAE or WRMSSE prefix."""
     if min(stride, rounds, threads) < 1:
         raise ValueError("XGBoost stride, rounds, and threads must be positive.")
     matrices = {}

@@ -8,10 +8,28 @@ each method on the selected forecast and across all test dates.
 The overall dashboard also reports RMSSE and a competition-style WRMSSE for
 the selected demo dataset.
 
-## Run locally
-
 Requires Python 3.11–3.13 and [uv](https://docs.astral.sh/uv/getting-started/installation/).
-Run commands from this directory:
+Run commands from the repository root.
+
+## View the documentation
+
+Start the MkDocs site:
+
+```bash
+uv sync --extra cpu --group docs
+uv run --extra cpu --group docs mkdocs serve -a 127.0.0.1:8000
+```
+
+**Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.** Keep the
+command running while reading; documentation edits reload automatically.
+The site covers installation, architecture, evaluation results, model improvements,
+notebook experiments, and the Python API.
+
+To use another port, run `make docs PORT=8889` and open
+[http://127.0.0.1:8889](http://127.0.0.1:8889).
+You can also browse the [Markdown documentation](docs/index.md) directly.
+
+## Run locally
 
 ```bash
 uv sync --extra cpu
@@ -36,7 +54,8 @@ uv run --extra cpu streamlit run app.py
 Open <http://localhost:8501>, select a series and a test forecast date. The app loads
 saved artifacts; it does not train or read the large CSVs on startup.
 
-Training now fits both models. To add XGBoost to an existing saved Conv1D run:
+The training command fits the original Conv1D and XGBoost models. To add XGBoost
+to an existing saved Conv1D run:
 
 ```bash
 uv run --extra cpu python -m m5_forecast.train --xgboost-only
@@ -63,8 +82,9 @@ Tweedie loss, and total-demand adjustments):
 uv run --extra cpu python -m m5_forecast.improve
 ```
 
-This selects models on validation WRMSSE and updates the dashboard artifacts,
-preserving the previous run in a timestamped backup. See
+This requires `sell_prices.csv`, runs on CPU, selects models on validation WRMSSE,
+and updates the dashboard artifacts while preserving the previous run in a
+timestamped backup. See
 [measured improvements](docs/operations/improvements.md) for before/after results.
 
 For an NVIDIA GPU with a driver supporting CUDA 12.8, use the `cuda` extra instead:
@@ -101,11 +121,12 @@ open notebook results in Streamlit.
   Each forecast uses only the 56 observations before its first predicted day.
 - Selection ranks products by their fraction of nonzero training days, then training
   mean sales. Per-series sales scales are fitted only on training observations.
-- Both models use the same weekly training dates by default. Validation chooses
-  the Conv1D epoch and XGBoost tree count by MAE in original units. Testing uses
-  eight weekly dates with seven targets each for all three methods.
+- Both models use the same weekly training dates by default. Original training
+  selects checkpoints by validation MAE; the improvement workflow selects models
+  and adjustments by validation WRMSSE. Testing uses eight weekly dates with seven
+  targets each for all three methods.
 - Test dates advance through time: previously observed test sales become history
-  for later forecasts. Weights and preprocessing remain fixed.
+  for later forecasts. Model weights and training-fitted scales stay fixed.
 - **MAE** is mean absolute error in units per day, averaged equally over all selected
   series, test forecast dates, and horizon days. Lower is better. A model that does
   not beat the baseline offers no demonstrated improvement on this backtest.
@@ -115,24 +136,20 @@ open notebook results in Streamlit.
 
 Training prints overall and per-date test MAE and saves everything to `artifacts/`:
 weights, preprocessing metadata, selected data, training history, metrics, and test
-forecasts. These files and the raw data are excluded from Git. Real M5 scores require
-downloading the dataset and running training; no performance claim is assumed.
+forecasts. These files and the raw data are excluded from Git. See the
+[evaluation guide](docs/operations/evaluation.md#current-m5-results) for measured
+original and improved results on the local 100-series run.
 
 This demo estimates recorded sales. Stockouts can hide demand; procurement decisions
 also need stock levels, lead times, and safety stock. Results for regular sellers
 do not represent all M5 products. Official M5 scoring uses the full hierarchy and a
 28-day horizon; this demo keeps the requested 56 → 7 forecasting task.
 
-## Documentation and checks
-
-The MkDocs site follows the `rag-demo` layout: Material theme, Getting Started,
-Architecture, Operations, and a docstring-based Code Reference.
+## Checks
 
 ```bash
-uv sync --extra cpu --group docs
-uv run --extra cpu --group docs mkdocs serve
 uv run --extra cpu --group docs mkdocs build --strict
-uv run --extra cpu pytest
+uv run --extra cpu --group notebook pytest
 uv run --extra cpu ruff check .
 ```
 
