@@ -32,6 +32,7 @@ by the competition winner.
 Use the [notebook walkthrough](operations/notebook.md) to reproduce both runs and
 try new settings one stage at a time.
 The [Code Reference](reference/index.md) is generated from Python docstrings.
+See [Publish the documentation](operations/deployment.md) to deploy this site to GitHub Pages.
 
 !!! note "Build these docs"
     Run `make docs` to serve the site at <http://127.0.0.1:8000>.

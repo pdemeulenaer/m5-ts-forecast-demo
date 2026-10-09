@@ -38,6 +38,7 @@ nav:
       - Evaluation and artifacts: operations/evaluation.md
       - Improving the models: operations/improvements.md
       - Notebook experiments: operations/notebook.md
+      - Publish the documentation: operations/deployment.md
   - Code Reference:
       - Python modules: reference/index.md
 

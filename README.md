@@ -25,6 +25,10 @@ command running while reading; documentation edits reload automatically.
 The site covers installation, architecture, evaluation results, model improvements,
 notebook experiments, and the Python API.
 
+The repository also publishes the documentation to
+[GitHub Pages](https://pdemeulenaer.github.io/m5-ts-forecast-demo/) after the
+Pages workflow is enabled. See the [deployment guide](docs/operations/deployment.md).
+
 To use another port, run `make docs PORT=8889` and open
 [http://127.0.0.1:8889](http://127.0.0.1:8889).
 You can also browse the [Markdown documentation](docs/index.md) directly.
